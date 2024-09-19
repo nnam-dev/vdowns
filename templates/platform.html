@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="platform-container">
+    <h2>{{ title }}</h2>
+    <form id="video-form">
+        <input  id="platform" type="hidden" name="platform" value="{{ platform }}" >
+        <div class="form-group">
+            <label for="video_url">Video URL:</label>
+            <input type="text" id="video_url" name="url" placeholder="Enter video URL">
+        </div>
+        <button type="button" id="fetch-info-btn">Fetch Video Info</button>
+    </form>
+
+    <div id="video-info" class="hidden">
+        <h3 id="video-title"></h3>
+        <img id="video-thumbnail" src="" alt="Video Thumbnail">
+        <p id="video-duration"></p>
+        <input id="best-video" style="display:none">
+         <input id="audio-only" style="display:none">
+         <input id="title" style="display:none">
+        <select id="format-select"></select>
+        <button type="button" id="download-btn">Download Selected</button>
+        <button type="button" id="best-btn">Download Best</button>
+    </div>
+
+    <div id="feedback" class="hidden"></div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('#fetch-info-btn').click(function() {
+        var platform = '{{ platform }}';
+        var url = $('#video_url').val();
+
+        $.post('/fetch_video_info', {url: url, platform: platform}, function(data) {
+            if (data.error) {
+                $('#feedback').text(data.error).show();
+            } else {
+                $('#video-title').text(data.title);
+                $('#video-thumbnail').attr('src', data.thumbnail);
+                $('#video-duration').text('Duration: ' + data.duration + ' seconds');
+                $('#format-select').empty();
+                $('#best-video').val(data.best);
+                $('#audio-only').val(data.audio);
+                $('#title').val(data.title);
+
+
+
+
+                $.each(data.formats, function(index, format) {
+
+                    $('#format-select').append('<option value="' +format.url  + '">' + format.format + ' (' + format.quality + ')</option>');
+                });
+                $('#video-info').show();
+                $('#feedback').hide();
+            }
+        });
+    });
+
+    $('#download-btn').click(function() {
+       alert("format")
+        var url = $('#format-select').val();
+         var title= $('#title').val();
+         var audio= $('#audio-only').val();
+         var platform= $('#platform').val();
+         window.location.href = '/download?url=' + encodeURIComponent(url) + '&title=' + encodeURIComponent(title) + '&audio=' + encodeURIComponent(audio) + '&platform=' + encodeURIComponent(platform);
+
+    });
+
+    $('#best-btn').click(function() {
+
+        var url = $('#best-video').val(); // Modify as needed to select the best format
+        var title= $('#title').val();
+        var audio= $('#audio-only').val();
+         var platform= $('#platform').val();
+        window.location.href = '/download_best?url=' + encodeURIComponent(url) + '&title=' + encodeURIComponent(title) + '&audio=' + encodeURIComponent(audio) + '&platform=' + encodeURIComponent(platform);
+
+    });
+});
+</script>
+{% endblock %}
