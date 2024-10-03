@@ -11,9 +11,11 @@ def download_dash_video(youtube_url, output_dir):
         print(f"Error creating directory {output_dir}: {e}")
         return
 
+    cookies_path = '/full/path/to/cookies.txt'
+
     # yt-dlp options to download best video and audio streams separately
     ydl_opts = {
-         'cookiesfrombrowser': 'chrome',
+        'cookies': cookies_path,
         'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best',  # Download best video and audio streams with specified formats
         'outtmpl': os.path.join(output_dir, '%(title)s.%(ext)s'),  # Output filename template
         'merge_output_format': 'mp4',  # Final format after merging
