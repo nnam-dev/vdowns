@@ -13,8 +13,6 @@ def download_dash_video(youtube_url, output_dir):
 
     # yt-dlp options to download best video and audio streams separately
     ydl_opts = {
-        'username': 'adigwennam@gmail.com',
-        'password': 'Loveme@1987',
         'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best',  # Download best video and audio streams with specified formats
         'outtmpl': os.path.join(output_dir, '%(title)s.%(ext)s'),  # Output filename template
         'merge_output_format': 'mp4',  # Final format after merging
@@ -24,7 +22,7 @@ def download_dash_video(youtube_url, output_dir):
             'key': 'FFmpegMerger',  # Merges video and audio
         }],
         'verbose': True,  # Enable verbose output to help diagnose issues
-        
+        'cookies': 'cookies.txt'
     }
 
     try:
