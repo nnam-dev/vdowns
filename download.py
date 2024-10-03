@@ -1,7 +1,9 @@
 import yt_dlp
 from pathlib import Path
 
-file_path = Path('static/cookies.txt')
+pat='static/cookies.txt'
+file_path = Path(pat)
+
 
 if file_path.is_file():
     print("The file exists.")
@@ -10,7 +12,7 @@ else:
 
 # Options to use the manually exported cookies
 ydl_opts = {
-    'cookies': 'static/cookies.txt',  # Full path to the exported cookies.txt file
+    'cookies': pat,  # Full path to the exported cookies.txt file
 }
 
 url = 'https://www.youtube.com/shorts/YV-gwsg2Ekc'
