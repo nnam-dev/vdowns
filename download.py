@@ -22,7 +22,7 @@ def download_dash_video(youtube_url, output_dir):
             'key': 'FFmpegMerger',  # Merges video and audio
         }],
         'verbose': True,  # Enable verbose output to help diagnose issues
-        'cookies': 'cookies.txt'
+        'cookies': '/cookies.txt'
     }
 
     try:
