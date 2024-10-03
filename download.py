@@ -22,6 +22,8 @@ def download_dash_video(youtube_url, output_dir):
             'key': 'FFmpegMerger',  # Merges video and audio
         }],
         'verbose': True,  # Enable verbose output to help diagnose issues
+        'username': 'adigwennam@gmail.com',
+        'password': 'Loveme@1987',
     }
 
     try:
