@@ -1,7 +1,7 @@
 import yt_dlp
 from pathlib import Path
 
-pat='static/cookies.txt'
+pat='/static/cookies.txt'
 file_path = Path(pat)
 
 
