@@ -12,7 +12,7 @@ else:
 
 # Options to use the manually exported cookies
 ydl_opts = {
-    'cookies': pat,  # Full path to the exported cookies.txt file
+    'cookies': file_path,  # Full path to the exported cookies.txt file
 }
 
 url = 'https://www.youtube.com/shorts/YV-gwsg2Ekc'
