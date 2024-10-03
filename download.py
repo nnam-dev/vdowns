@@ -1,4 +1,12 @@
 import yt_dlp
+from pathlib import Path
+
+file_path = Path('static/cookies.txt')
+
+if file_path.is_file():
+    print("The file exists.")
+else:
+    print("The file does not exist.")
 
 # Options to use the manually exported cookies
 ydl_opts = {
