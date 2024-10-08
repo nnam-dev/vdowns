@@ -8,37 +8,97 @@ import yt_dlp
 import requests
 from moviepy.editor import VideoFileClip, AudioFileClip
 import tempfile
-
-
+import subprocess
 
 app = Flask(__name__)
 
 
 # Helper functions for video information fetching
 
+
+
 def fetch_youtube_info(url):
-    with yt_dlp.YoutubeDL() as ydl:
-        info = ydl.extract_info(url, download=False)
-    formats = info.get('formats', [])
-
+    # Placeholder for fetching Instagram video information
+    # Implement API or web scraping here
+    # Placeholder for fetching Facebook video information
+    # Implement API or web scraping here
+    ydl_opts = {
+        'quiet': True,
+        'no_warnings': True,
+        'noplaylist': True,
+        'cookiesfrombrowser': 'chrome',
+    }
     defined_keys = 'manifest_url'
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        info_dict = ydl.extract_info(url, download=False)
+        formats = info_dict.get('formats', [])
 
-    best_format = [f for f in formats if f.get('ext') == 'mp4' and f['vcodec'] != 'none' and f['acodec'] != 'none']
-    other_formats = [f for f in formats if f.get('ext') == 'mp4' and f['vcodec'] != 'none' and defined_keys in f]
+    # Audio Format URL Formatting
+    audio_format = [f for f in formats if f.get('audio_ext') == "mp4" and f.get('video_ext') == "none"]
 
-    for obj in other_formats:
-        obj['url'] = obj['manifest_url']
+    f_audio_format = audio_format[0]
+    f_audio_format_url = f_audio_format['url']
 
-    all_formats = best_format + other_formats
-    f_best_format = best_format[0]
+    # Extract necessary video details
+    video_details = {
+        'title': info_dict.get('title', 'Unknown Title'),
+        'thumbnail': info_dict.get('thumbnail', ''),
+        'duration': info_dict.get('duration', 0),
+    }
+
+    # Filter formats for MP4 only
+    mp4_formats = [
+        {
+            'format_id': f['format_id'],
+            'format': f"{f['width']}x{f['height']}",
+            'quality': '',
+            'url': f['url'],
+
+        }
+        for f in formats if f.get('ext') == 'mp4' and f.get('video_ext') != "none" and defined_keys not in f
+    ]
+    mp4s = [f for f in formats if f.get('ext') == 'mp4' and f.get('video_ext') != "none" and defined_keys not in f]
+
+    print(
+        json.dumps(mp4s)
+    )
+    # Best Format
+    best_format = max(mp4_formats, key=lambda f: f['format'])
+
+    print(best_format['url'])
 
     return {
-        'title': info.get('title'),
-        'thumbnail': info.get('thumbnail'),
-        'duration': info.get('duration'),
-        'best': f_best_format.get('url'),
-        'formats': all_formats
+        'title': info_dict.get('title', 'Unknown Title'),
+        'thumbnail': info_dict.get('thumbnail', ''),
+        'duration': info_dict.get('duration', 0),
+        'formats': mp4_formats,
+        'best': best_format['url'],
+        'audio': f_audio_format_url
+
     }
+
+
+def download_dash_video(youtube_url, output_dir):
+    # Ensure the output directory exists
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    # yt-dlp options to download best video and audio streams separately
+    ydl_opts = {
+        'format': 'bestvideo+bestaudio/best',  # Download best video and audio streams
+         'outtmpl': os.path.join(output_dir, '%(title)s.%(ext)s'),  # Output filename template
+        'merge_output_format': 'mp4',  # Final format after merging
+        'postprocessors': [{
+            'key': 'FFmpegMerger',  # Merges video and audio
+        }],
+        'restrictfilenames': True,  # Remove special characters in filenames
+        'windowsfilenames': True,  # Ensure Windows-compatible filenames
+    }
+
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([youtube_url])
+
+    # Merged file will be saved in the output_dir with the video title as its name
 
 
 def fetch_facebook_info(url):
@@ -105,8 +165,6 @@ def fetch_instagram_info(url):
         info_dict = ydl.extract_info(url, download=False)
         formats = info_dict.get('formats', [])
 
-
-
     # Audio Format URL Formatting
     audio_format = [f for f in formats if f.get('acodec') != "none" and f.get('vcodec') == "none"]
     f_audio_format = audio_format[0]
@@ -135,7 +193,6 @@ def fetch_instagram_info(url):
     best_format = max(mp4_formats, key=lambda f: f['format'])
 
     print(best_format['url'])
-
 
     return {
         'title': info_dict.get('title', 'Unknown Title'),
@@ -169,13 +226,12 @@ def fetch_tiktok_info(url):
 
         print(json.dumps(info_dict))
 
-
     return {
-            'title': 'Sample TikTok Video',
-            'thumbnail': 'https://via.placeholder.com/150',
-            'duration': 60,
-            'formats': [{'url': 'https://example.com/video.mp4', 'format': 'MP4', 'quality': 'High'}]
-        }
+        'title': 'Sample TikTok Video',
+        'thumbnail': 'https://via.placeholder.com/150',
+        'duration': 60,
+        'formats': [{'url': 'https://example.com/video.mp4', 'format': 'MP4', 'quality': 'High'}]
+    }
 
 
 def fetch_twitter_info(url):
@@ -194,6 +250,10 @@ def merge_video_audio(video_url, audio_url):
     video_response = requests.get(video_url)
     audio_response = requests.get(audio_url)
 
+    output_dir = './downloads'  # Output directory
+
+    download_dash_video(video_url, output_dir)
+
     # Create temporary files to hold the video and audio streams
     with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as video_temp_file:
         video_temp_file.write(video_response.content)
@@ -202,6 +262,8 @@ def merge_video_audio(video_url, audio_url):
     with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as audio_temp_file:
         audio_temp_file.write(audio_response.content)
         audio_temp_file_path = audio_temp_file.name  # Save the file path to delete later
+
+    print(video_temp_file_path)
 
     # Use moviepy to load the video and audio files
     video_clip = VideoFileClip(video_temp_file_path)
@@ -232,6 +294,7 @@ def merge_video_audio(video_url, audio_url):
     # Return the merged video in memory
     merged_video.seek(0)
     return merged_video
+
 
 @app.route('/')
 def index():
@@ -370,8 +433,7 @@ def download():
     if not url:
         return 'URL is required.', 400
 
-    if platform == 'instagram':
-
+    if platform == 'instagram' or platform == 'youtube':
         # Merge the video and audio
         merged_video = merge_video_audio(url, audio_url)
 
@@ -400,8 +462,12 @@ def download_best():
 
     return stream_video_from_url(url, title)
 
+
 # return send_file(url, as_attachment=True,download_name=filename, mimetype='video/mp4')
 
+output_dir = './downloads'  # Output directory
+
+download_dash_video("https://youtube.com/shorts/2ON2kzUnoxA?si=0LfjdoQB7vu17rPl", output_dir)
 
 if __name__ == '__main__':
     app.run(debug=True)
