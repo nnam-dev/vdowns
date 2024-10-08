@@ -463,11 +463,5 @@ def download_best():
     return stream_video_from_url(url, title)
 
 
-# return send_file(url, as_attachment=True,download_name=filename, mimetype='video/mp4')
-
-output_dir = './downloads'  # Output directory
-
-download_dash_video("https://youtube.com/shorts/2ON2kzUnoxA?si=0LfjdoQB7vu17rPl", output_dir)
-
 if __name__ == '__main__':
     app.run(debug=True)
