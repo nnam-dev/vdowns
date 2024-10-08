@@ -3,4 +3,5 @@ flask
 moviepy
 yt_dlp
 gunicorn
+Flask-Cors
 
