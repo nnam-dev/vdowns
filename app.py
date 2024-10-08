@@ -26,7 +26,7 @@ def fetch_youtube_info(url):
         'quiet': True,
         'no_warnings': True,
         'noplaylist': True,
-        'cookiesfrombrowser': 'chrome',
+        'cookies': 'cookies.txt'
     }
     defined_keys = 'manifest_url'
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
