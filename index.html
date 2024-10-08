@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Downloader</title>
+    <script>
+        async function downloadVideo() {
+            const url = document.getElementById('url').value;
+            const cookies = document.getElementById('cookies').value;
+
+            const response = await fetch('/download', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ url, cookies })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                document.getElementById('downloadLink').innerHTML = `
+                    <a href="${data.download_link}" download>Download Video</a>
+                `;
+            } else {
+                document.getElementById('downloadLink').innerText = data.error;
+            }
+        }
+
+        async function deleteFile() {
+            const filename = document.getElementById('filenameToDelete').value;
+
+            const response = await fetch(`/delete_file?filename=${filename}`, {
+                method: 'DELETE',
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert(data.message);
+            } else {
+                alert(data.error);
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>YouTube Video Downloader</h1>
+    <label for="url">Video URL:</label><br>
+    <input type="text" id="url" required><br><br>
+    <label for="cookies">Cookies (optional):</label><br>
+    <textarea id="cookies" rows="4" cols="50"></textarea><br><br>
+    <button onclick="downloadVideo()">Download Video</button>
+    
+    <h2>Download Link:</h2>
+    <div id="downloadLink"></div>
+
+    <h2>Delete File:</h2>
+    <label for="filenameToDelete">Filename:</label><br>
+    <input type="text" id="filenameToDelete" required>
+    <button onclick="deleteFile()">Delete</button>
+</body>
+</html>
